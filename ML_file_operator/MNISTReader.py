@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+@author: Jalen Shen
+"""
 
 import numpy as np
 import imageio
@@ -9,7 +12,7 @@ class MNISTImageReader():
     use cases:
         # case 1
         with MNISTImageReader('t10k-images.idx3-ubyte') as reader:
-            # the reader was designed as a iterable object.
+            # the reader was designed as an iterable object.
             for index, image in reader:
                 ...
         
@@ -17,13 +20,14 @@ class MNISTImageReader():
         reader = MNISTImageReader('t10k-images.idx3-ubyte')
         reader.open()
         # read 10 images from source file. 
-        # the result is returned as dictionary with index as key and image as value
-        images = reader.read(10) 
+        # there will be two returned value, the first one is an index list corresponding to returned images,
+        # the second one is a multi-dimensional numpy array which hold the image data.
+        index, images = reader.read(10) 
         reader.close()
 
         # case 3
         with MNISTImageReader('t10k-images.idx3-ubyte') as reader:
-            images = reader.read(10) # Of course, you can access images using read() within 'with' context.
+            index, images = reader.read(10) # Of course, you can access images using read() within 'with' context.
     """
     _expected_magic = 2051
     _current_index = 0
@@ -62,15 +66,10 @@ class MNISTImageReader():
             return self._current_index, np.frombuffer(raw_image_data, dtype=np.uint8).reshape((self.__num_of_rows, self.__num_of_cols))
 
     def read(self, num):
-        result = dict()
-        for i in range(num):
-            raw_image_data = self.__file_object.read(self.__num_of_rows * self.__num_of_cols)
-            if self.__file_object is None or raw_image_data == b'':
-                break
-            else:
-                self._current_index += 1
-                result[f'{self._current_index}'] = np.frombuffer(raw_image_data, dtype=np.uint8).reshape((self.__num_of_rows, self.__num_of_cols))
-        return result
+        feasible_num = num if self.__num_of_images - self._current_index >= num else self.__num_of_images - self._current_index
+        raw_image_data = self.__file_object.read(self.__num_of_rows * self.__num_of_cols * feasible_num)
+        index = range(self._current_index + 1, self._current_index + feasible_num + 1)
+        return index, np.frombuffer(raw_image_data, dtype=np.uint8).reshape((feasible_num, self.__num_of_rows, self.__num_of_cols))
 
     def open(self):
         self.__file_object = open(self.__path, 'rb')
@@ -87,16 +86,13 @@ class MNISTImageReader():
     def close(self):
         self.__file_object.close()
 
-
-
-
 class MNISTLabelReader():
     """
     brief: read label data from .idx1-ubyte file as integer (0, 1, ..., 9)
     use cases:
         # case 1
         with MNISTLabelReader('t10k-labels.idx1-ubyte') as reader:
-            # the reader was designed as a iterable object.
+            # the reader was designed as an iterable object.
             for index, label in reader:
                 ...
         
@@ -104,13 +100,14 @@ class MNISTLabelReader():
         reader = MNISTLabelReader('t10k-labels.idx1-ubyte')
         reader.open()
         # read 10 labels from source file. 
-        # the result is returned as dictionary with index as key and label as value
-        images = reader.read(10) 
+        # there will be two returned value, the first one is an index list corresponding to returned labels,
+        # the second one is a numpy array which hold the label data.
+        index, labels = reader.read(10) 
         reader.close()
 
         # case 3
         with MNISTImageReader('t10k-images.idx3-ubyte') as reader:
-            images = reader.read(10) # Of course, you can access labels using read() within 'with' context.
+            index, labels = reader.read(10) # Of course, you can access labels using read() within 'with' context.
     """
     _expected_magic = 2049
     _current_index = 0
@@ -147,15 +144,10 @@ class MNISTLabelReader():
             return self._current_index, int.from_bytes(raw_label, byteorder='big')
 
     def read(self, num):
-        result = dict()
-        for i in range(num):
-            raw_label = self.__file_object.read(1)
-            if self.__file_object is None or raw_label == b'':
-                break
-            else:
-                self._current_index += 1
-                result[f'{self._current_index}'] = int.from_bytes(raw_label, byteorder='big')
-        return result
+        feasible_num = num if self.__num_of_labels - self._current_index >= num else self.__num_of_labels - self._current_index
+        raw_label_data = self.__file_object.read(feasible_num)
+        index = range(self._current_index + 1, self._current_index + feasible_num + 1)
+        return index, np.frombuffer(raw_label_data, dtype=np.uint8).reshape((feasible_num,))
 
     def open(self):
         self.__file_object = open(self.__file_path, 'rb')
