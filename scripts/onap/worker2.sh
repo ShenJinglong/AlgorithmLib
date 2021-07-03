@@ -17,12 +17,6 @@ docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.8.0
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.8.0 k8s.gcr.io/coredns/coredns:v1.8.0
 docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.8.0
 
-kubeadm init
-
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
 mkdir -p /etc/cni/net.d
 cat >/etc/cni/net.d/10-mynet.conf <<-EOF
 {
@@ -48,4 +42,6 @@ cat >/etc/cni/net.d/99-loopback.conf <<-EOF
 }
 EOF
 
-kubectl get pods -n kube-system
+echo "Please add this worker to cluster manually ..."
+echo "Pull images | configure network"
+echo "Next script 'master3.sh'"

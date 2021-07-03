@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo su
+
 images=(
     kube-apiserver:v1.21.2
     kube-controller-manager:v1.21.2
@@ -17,7 +19,7 @@ docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.8.0
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.8.0 k8s.gcr.io/coredns/coredns:v1.8.0
 docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.8.0
 
-kubeadm init
+kubeadm init --pod-network-cidr=10.244.0.0/16
 
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -49,3 +51,8 @@ cat >/etc/cni/net.d/99-loopback.conf <<-EOF
 EOF
 
 kubectl get pods -n kube-system
+
+echo "Pull images | init kubernetes | configure network"
+echo "Next script 'worker1'"
+echo "Execute 'kubectl get nodes' to verify kubernetes installation ..."
+
