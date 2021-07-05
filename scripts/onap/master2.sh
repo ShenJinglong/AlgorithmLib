@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sudo su
-
 images=(
     kube-apiserver:v1.21.2
     kube-controller-manager:v1.21.2

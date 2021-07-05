@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sudo su
-
 cd ~
 git clone -b 8.0.0 http://gerrit.onap.org/r/oom --recurse-submodules
 cd oom/kubernetes
@@ -12,6 +10,7 @@ echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt
 sudo apt-get update
 sudo apt-get install helm
 
+mkdir -p ~/.local/share/helm/plugins
 cp -R ~/oom/kubernetes/helm/plugins/ ~/.local/share/helm/plugins
 helm plugin install https://github.com/chartmuseum/helm-push.git
 

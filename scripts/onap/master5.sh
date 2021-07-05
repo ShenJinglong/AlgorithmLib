@@ -13,6 +13,8 @@ helm repo list
 
 whereis helm
 read -p "Enter helm path: " HELM_PATH
+apt install make
+cd ~/oom/kubernetes/
 make SKIP_LINT=TRUE [HELM_BIN=HELM_PATH] all ; make SKIP_LINT=TRUE [HELM_BIN=HELM_PATH] onap
 
 helm repo update
